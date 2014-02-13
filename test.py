@@ -1,10 +1,8 @@
 from Queue import Queue
+corners = [(i,j) for i in range(0,7,3) for j in range(0,7,3)]
+set = set()
 
+set.add(3)
 
-s = set()
-s.add(3)
-s.add(4)
-s.add(4)
+print set
 
-
-print len(s)
