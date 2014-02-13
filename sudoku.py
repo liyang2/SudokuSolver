@@ -132,4 +132,3 @@ solver.sudoku_solve(board)
 for row in board:
     print row
 
-

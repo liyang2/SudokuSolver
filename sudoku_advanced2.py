@@ -1,14 +1,7 @@
-from Queue import Queue
+# this is an equivalent version of sudoku_advanced.py
+# used to deal with input like this
+# ["..9748...","7........",".2.1.9...","..7...24.",".64.1.59.",".98...3..","...8.3.2.","........6","...2759.."]
 
-# this advanced version of sudoku solver combined inference with search
-# thus it can tackle much more hard sudoku puzzles
-class Assignment:
-    def __init__(self, pos, val):
-        self.pos = pos
-        self.val = val
-
-    def __str__(self):
-        return "Assign " + str(self.val) + " to " + str((self.pos[0]+1, self.pos[1]+1))
 
 
 class Sudoku:
@@ -37,20 +30,20 @@ class Sudoku:
 
     # try to narrow down each cell's range before searching
     def inference(self, board):
-        self.assignments = Queue()
+        self.assignments = []
         for i in range(9):
             for j in range(9):
                 if board[i][j] != None:
-                    self.assignments.put(Assignment( (i,j),board[i][j] ))
+                    self.assignments.append(( (i,j),board[i][j] ))
 
-        while not self.assignments.empty():
-            a = self.assignments.get()
-            board[a.pos[0]][a.pos[1]] = a.val
+        while len( self.assignments) > 0:
+            a = self.assignments.pop()
+            board[a[0][0]][a[0][1]] = a[1]
 
-            self.update_range(a.pos, a.val)
-            if self.assignments.empty():
+            self.update_range(a[0], a[1])
+            if len(self.assignments)==0:
                 for assign in set(self.naked_single(board) + self.hidden_single(board)):
-                    self.assignments.put(assign)
+                    self.assignments.append(assign)
 
     # select an empty cell according to the minimum- remaining-values heuristic
     def empty_cell(self, board):
@@ -68,8 +61,21 @@ class Sudoku:
         return returnPos
 
     def sudoku_solve(self,board):
-        self.inference(board)
-        self.solve(board)
+        newboard = []
+        for i in range(9):
+            row = []
+            for j in range(9):
+                if board[i][j] == '.':
+                    row.append(None)
+                else:
+                    row.append(int(board[i][j]))
+            newboard.append(row)
+
+        self.inference(newboard)
+        self.solve(newboard)
+
+        for i in range(9):
+            board[i] = "".join(str(x) for x in newboard[i])
 
     # search for solution recursively
     def solve(self, board):  # board is 9*9 array
@@ -135,7 +141,7 @@ class Sudoku:
                 if board[i][j] != None:
                     continue
                 if len(self.range[(i, j)]) == 1:
-                    new_assigns.append(Assignment((i, j), self.range[(i, j)][0]))
+                    new_assigns.append(((i, j), self.range[(i, j)][0]))
         return new_assigns
 
     def hidden_single(self, board):
@@ -152,7 +158,7 @@ class Sudoku:
                             cell_contain_val = True
                             break
                     if cell_contain_val == False:
-                        new_assigns.append(Assignment((i, j), val))
+                        new_assigns.append(((i, j), val))
                         break
 
                     # check same column
@@ -162,7 +168,7 @@ class Sudoku:
                             cell_contain_val = True
                             break
                     if cell_contain_val == False:
-                        new_assigns.append(Assignment((i, j), val))
+                        new_assigns.append(((i, j), val))
                         break
 
                     # check same box
@@ -172,22 +178,13 @@ class Sudoku:
                             cell_contain_val = True
                             break
                     if cell_contain_val == False:
-                        new_assigns.append(Assignment((i, j), val))
+                        new_assigns.append(((i, j), val))
                         break
 
         return new_assigns
 
 
-board = [[None,None,9,7,4,8,None,None,None],
-         [7,None,None,None,None,None,None,None,None],
-         [None,2,None,1,None,9,None,None,None],
-         [None,None,7,None,None,None,2,4,None],
-         [None,6,4,None,1,None,5,9,None],
-         [None,9,8,None,None,None,3,None,None],
-         [None,None,None,8,None,3,None,2,None],
-         [None,None,None,None,None,None,None,None,6],
-         [None,None,None,2,7,5,9,None,None]]
-
+board = ["..9748...","7........",".2.1.9...","..7...24.",".64.1.59.",".98...3..","...8.3.2.","........6","...2759.."]
 
 solver = Sudoku()
 solver.sudoku_solve(board)
@@ -195,5 +192,4 @@ solver.sudoku_solve(board)
 
 for row in board:
     print row
-
 
