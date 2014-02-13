@@ -14,7 +14,6 @@ class Assignment:
 class Sudoku:
     def __init__(self):
         self.range = {}
-        self.solved = set()
         self.row_cells = [[(i, j) for j in range(9)] for i in range(9)]
         self.column_cells = [[(j, i) for j in range(9)] for i in range(9)]
         self.box_cells = {}
@@ -47,14 +46,9 @@ class Sudoku:
             a = self.assignments.get()
             board[a.pos[0]][a.pos[1]] = a.val
 
-            self.solved.add(a.pos)
-            if len(self.solved) == 81:
-                print "Mission Complete!"
-                break
-
             self.update_range(a.pos, a.val)
             if self.assignments.empty():
-                for assign in set(self.naked_single() + self.hidden_single()):
+                for assign in set(self.naked_single(board) + self.hidden_single(board)):
                     self.assignments.put(assign)
                     print assign
 
@@ -70,21 +64,21 @@ class Sudoku:
                 self.range[pos].remove(val)
 
     # strategies to find new assignments
-    def naked_single(self):
+    def naked_single(self, board):
         new_assigns = []
         for i in range(9):
             for j in range(9):
-                if (i,j) in self.solved:
+                if board[i][j] != None:
                     continue
                 if len(self.range[(i, j)]) == 1:
                     new_assigns.append(Assignment((i, j), self.range[(i, j)][0]))
         return new_assigns
 
-    def hidden_single(self):
+    def hidden_single(self, board):
         new_assigns = []
         for i in range(9):
             for j in range(9):
-                if (i,j) in self.solved:
+                if board[i][j] != None:
                     continue
                 for val in self.range[(i, j)]:
                     # check same row
